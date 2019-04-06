@@ -123,4 +123,59 @@ stopifnot(round(angular_function_m0_l1(pi,0),digits= 5)== -0.48860+0i)
 stopifnot(round(angular_function_m1_l1(pi/2,pi),digits= 5) == -0.34549+0i)
 stopifnot(round(angular_function_m0_l2(pi,0),digits= 5) == 0.63078+0i)
 
+#find the radial coefficient
+#take note this does not include the constant a, we will just include that at the end
+radial_coefficient <- function(n,l){
+  left_side <- (2/n)^3
+  top_right <- factorial(n-l-1)
+  bottom_right <- 2*n*(factorial(n+l))^3
+  return(sqrt(left_side*top_right/bottom_right))
+}
 
+#all the polynomials are predefined as doing the differentiation would take too
+#much computational power defining bohr radius
+a <- 5.291772*10^-11
+
+#hard coding the individual polynomial lists
+polynomial_list_n1 <- list(
+  function(r) 1
+)
+
+polynomial_list_n2 <- list(
+  function(r) 1-r/(2*a),
+  function(r) r/a
+)
+
+polynomial_list_n3 <- list(
+  function(r) 27-18*r/a+2*(r/a)^2,
+  function(r) r/a-((r/a)^2)/6,
+  function(r) (r/a)^2
+)
+
+polynomial_list_n4 <-list(
+  function(r) 1-3*(r/a)/4+((r/a)^2)/8 - ((r/a)^3)/192,
+  function(r) 1-(r/a)/4+((r/a)^2)/80,
+  function(r) 1-(r/a)/12,
+  function(r) (r/a)^3
+)
+
+#polynomial finder list
+polynomial_list <- list(
+  polynomial_list_n1,
+  polynomial_list_n2,
+  polynomial_list_n3,
+  polynomial_list_n4
+)
+
+#find the radial part of the wave function
+radial_wave_func <- function(n,l){
+  coefficient <- radial_coefficient(n,l)
+  polynomial_function <- polynomial_list[[n]][[l-1]]
+  return(function(r){
+    exponential_part <- exp(-r/a/n)
+    radial_part <- coefficient*polynomial_function(n)*exponential_part
+    return(radial_part)
+  })
+}
+
+radial_wave_func_n1_l0 <- radial_wave_func(1,0)
